@@ -1,0 +1,675 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Text To Word</title></head><body><h2 class="PDq2pG_selectionAnchorContainer" dir="auto" data-section-id="qx486z" data-start="381" data-end="416">Experiment 1 — Prove a Data Race</h2>
+<h3 dir="auto" data-section-id="8jioo7" data-start="418" data-end="441">1. Hardware concept</h3>
+<p dir="auto" data-start="443" data-end="484">Suppose two threads run on two CPU cores:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="pointer-events-none absolute end-1.5 top-1 z-2 md:end-2 md:top-1">&nbsp;</div>
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>Core 1                         Core 2
+  │                              │
+Thread 1                      Thread 2
+  │                              │
+  └──────────┐       ┌──────────┘
+             ↓       ↓
+           counter
+             │
+          Memory</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="">
+<div class="">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="754" data-end="762">We have:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="relative h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="pointer-events-none absolute inset-x-4 top-12 bottom-4">
+<div class="pointer-events-none sticky z-40 shrink-0 z-1!">
+<div class="sticky bg-token-border-light">&nbsp;</div>
+</div>
+</div>
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="">
+<div class="relative">
+<div class="">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code><span class="ͼ11">counter</span><span class="ͼv">++</span>;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="">
+<div class="">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="788" data-end="830">It looks like one operation, but it isn't.</p>
+<p dir="auto" data-start="832" data-end="845">Conceptually:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="pointer-events-none absolute end-1.5 top-1 z-2 md:end-2 md:top-1">&nbsp;</div>
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>READ counter
+     ↓
+ADD 1
+     ↓
+WRITE counter</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="">
+<div class="">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="907" data-end="926">So this can happen:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="pointer-events-none absolute end-1.5 top-1 z-2 md:end-2 md:top-1">&nbsp;</div>
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>Thread 1                 Thread 2
+
+READ 0
+                         READ 0
+ADD 1
+                         ADD 1
+WRITE 1
+                         WRITE 1</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="">
+<div class="">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="1093" data-end="1102">Expected- 2</p>
+<p dir="auto" data-start="1119" data-end="1126">Actual- 1</p>
+<p dir="auto" data-start="1143" data-end="1171">That's a <strong data-start="1152" data-end="1170">race condition</strong>.</p>
+<hr data-start="1173" data-end="1176">
+<h2 dir="auto" data-section-id="10g8yz9" data-start="1178" data-end="1199">2. Experiment code</h2>
+<p dir="auto" data-start="1201" data-end="1208">Create:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="relative h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="">
+<div class="relative">
+<div class="">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>import java.util.concurrent.atomic.AtomicInteger;</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>public class DataRaceFixed {</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; static AtomicInteger counter = new AtomicInteger(0);</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; public static void main(String[] args) throws Exception {</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; int threads = 10;<br>&nbsp; &nbsp; &nbsp; &nbsp; int increments = 1_000_000;</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; Thread[] workers = new Thread[threads];</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; for (int i = 0; i &lt; threads; i++) {</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; workers[i] = new Thread(() -&gt; {</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; for (int j = 0; j &lt; increments; j++) {<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; counter.incrementAndGet();<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; });</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; workers[i].start();<br>&nbsp; &nbsp; &nbsp; &nbsp; }</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; for (Thread worker : workers) {<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; worker.join();<br>&nbsp; &nbsp; &nbsp; &nbsp; }</p>
+<p>&nbsp; &nbsp; &nbsp; &nbsp; System.out.println("Expected: " + threads * increments);<br>&nbsp; &nbsp; &nbsp; &nbsp; System.out.println("Actual: &nbsp; " + counter.get());<br>&nbsp; &nbsp; }<br>}</p>
+<pre class="cm-content q9tKkq_readonly m-0">&nbsp;</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<hr data-start="1948" data-end="1951">
+<h2 dir="auto" data-section-id="d0lu6e" data-start="1953" data-end="1978">3. What should happen?</h2>
+<p dir="auto" data-start="1980" data-end="1989">Expected:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0">10 * 1,000,000 = 10000000</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>Expected: 10000000
+Actual:   6328147</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="2115" data-end="2118">or:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>Expected: 10000000
+Actual:   8419273</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="2170" data-end="2225">Exact result will depend on your computer and run.</p>
+<p dir="auto" data-start="2227" data-end="2273">Sometimes you may even get the expected value.</p>
+<p dir="auto" data-start="2275" data-end="2296"><strong data-start="2275" data-end="2296">That's important.</strong></p>
+<p dir="auto" data-start="2298" data-end="2352">A concurrency bug isn't required to happen every time.</p>
+<p dir="auto" data-start="2354" data-end="2376">Run it multiple times.</p>
+<p dir="auto" data-start="2378" data-end="2390">For example:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>Run 1 → 7,821,432
+Run 2 → 8,213,902
+Run 3 → 7,564,221
+Run 4 → 9,103,774
+Run 5 → 8,442,019</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="">
+<div class="">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<hr data-start="2495" data-end="2498">
+<h1 dir="auto" data-section-id="1lug4ft" data-start="2500" data-end="2532">4. Why did we lose increments?</h1>
+<p dir="auto" data-start="2534" data-end="2542">Because:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="relative h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="">
+<div class="relative">
+<div class="">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code><span class="ͼ11">counter</span><span class="ͼv">++</span>;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="2568" data-end="2582">is not atomic.</p>
+<p dir="auto" data-start="2584" data-end="2592">Let's say:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>counter = 100</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="2621" data-end="2641">Two threads execute:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>Thread A → reads 100
+Thread B → reads 100
+
+Thread A → calculates 101
+Thread B → calculates 101
+
+Thread A → writes 101
+Thread B → writes 101</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="2796" data-end="2820">Two increments happened.</p>
+<p dir="auto" data-start="2822" data-end="2845">But the final value is: 101</p>
+<p dir="auto" data-start="2864" data-end="2875">instead of: 102</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0">The second write overwrote the first thread's result.</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<hr data-start="2949" data-end="2952">
+<h1 dir="auto" data-section-id="vuafq9" data-start="2954" data-end="2969">5. Now let's fix it</h1>
+<p dir="auto" data-start="2971" data-end="2975">Use:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="relative h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="">
+<div class="relative">
+<div class="">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code><span class="ͼ11">AtomicInteger</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="relative h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="">
+<div class="relative">
+<div class="">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code><span class="ͼv">import</span> <span class="ͼ11">java</span><span class="ͼv">.</span><span class="ͼ11">util</span><span class="ͼv">.</span><span class="ͼ11">concurrent</span><span class="ͼv">.</span><span class="ͼ11">atomic</span><span class="ͼv">.</span><span class="ͼ11">AtomicInteger</span>;
+
+<span class="ͼv">public</span> <span class="ͼv">class</span> <span class="ͼ11">DataRaceFixed</span> {
+
+    <span class="ͼv">static</span> <span class="ͼ11">AtomicInteger</span> <span class="ͼ11">counter</span> <span class="ͼv">=</span> <span class="ͼv">new</span> <span class="ͼ11">AtomicInteger</span>(<span class="ͼy">0</span>);
+
+    <span class="ͼv">public</span> <span class="ͼv">static</span> <span class="ͼv">void</span> <span class="ͼ11">main</span>(<span class="ͼ11">String</span>[] <span class="ͼ11">args</span>) <span class="ͼv">throws</span> <span class="ͼ11">Exception</span> {
+
+        <span class="ͼ11">int</span> <span class="ͼ11">threads</span> <span class="ͼv">=</span> <span class="ͼy">10</span>;
+        <span class="ͼ11">int</span> <span class="ͼ11">increments</span> <span class="ͼv">=</span> <span class="ͼy">1_000_000</span>;
+
+        <span class="ͼ11">Thread</span>[] <span class="ͼ11">workers</span> <span class="ͼv">=</span> <span class="ͼv">new</span> <span class="ͼ11">Thread</span>[<span class="ͼ11">threads</span>];
+
+        <span class="ͼv">for</span> (<span class="ͼ11">int</span> <span class="ͼ11">i</span> <span class="ͼv">=</span> <span class="ͼy">0</span>; <span class="ͼ11">i</span> <span class="ͼv">&lt;</span> <span class="ͼ11">threads</span>; <span class="ͼ11">i</span><span class="ͼv">++</span>) {
+
+            <span class="ͼ11">workers</span>[<span class="ͼ11">i</span>] <span class="ͼv">=</span> <span class="ͼv">new</span> <span class="ͼ11">Thread</span>(() -&gt; {
+
+                <span class="ͼv">for</span> (<span class="ͼ11">int</span> <span class="ͼ11">j</span> <span class="ͼv">=</span> <span class="ͼy">0</span>; <span class="ͼ11">j</span> <span class="ͼv">&lt;</span> <span class="ͼ11">increments</span>; <span class="ͼ11">j</span><span class="ͼv">++</span>) {
+                    <span class="ͼ11">counter</span><span class="ͼv">.</span><span class="ͼ11">incrementAndGet</span>();
+                }
+
+            });
+
+            <span class="ͼ11">workers</span>[<span class="ͼ11">i</span>]<span class="ͼv">.</span><span class="ͼ11">start</span>();
+        }
+
+        <span class="ͼv">for</span> (<span class="ͼ11">Thread</span> <span class="ͼ11">worker</span> : <span class="ͼ11">workers</span>) {
+            <span class="ͼ11">worker</span><span class="ͼv">.</span><span class="ͼ11">join</span>();
+        }
+
+        <span class="ͼ11">System</span><span class="ͼv">.</span><span class="ͼ11">out</span><span class="ͼv">.</span><span class="ͼ11">println</span>(<span class="ͼz">"Expected: "</span> <span class="ͼv">+</span> <span class="ͼ11">threads</span> <span class="ͼv">*</span> <span class="ͼ11">increments</span>);
+        <span class="ͼ11">System</span><span class="ͼv">.</span><span class="ͼ11">out</span><span class="ͼv">.</span><span class="ͼ11">println</span>(<span class="ͼz">"Actual:   "</span> <span class="ͼv">+</span> <span class="ͼ11">counter</span><span class="ͼv">.</span><span class="ͼ11">get</span>());
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="">
+<div class="">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="3811" data-end="3815">Now:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>Expected: 10000000
+Actual:   10000000</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="3868" data-end="3947">The atomic operation provides the required synchronization/ordering guarantees.</p>
+<hr data-start="3949" data-end="3952">
+<h1 dir="auto" data-section-id="qzwlw5" data-start="3954" data-end="3979">Experiment 1 conclusion</h1>
+<h3 dir="auto" data-section-id="1tnrhc4" data-start="3981" data-end="3999">What we proved</h3>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>Normal int
+   ↓
+counter++
+   ↓
+read-modify-write
+   ↓
+multiple threads interfere
+   ↓
+lost updates</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p dir="auto" data-start="4113" data-end="4121">Whereas:</p>
+<div class="relative w-full mt-4 mb-1">
+<div class="">
+<div class="contents">
+<div class="relative">
+<div class="h-full min-h-0 min-w-0">
+<div class="h-full min-h-0 min-w-0">
+<div class="border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl">
+<div class="h-full w-full border-radius-3xl bg-(--code-block-surface) corner-superellipse/1.1 overflow-clip rounded-3xl [--code-block-surface:var(--bg-elevated-secondary)] dark:[--code-block-surface:var(--composer-surface-primary)] lxnfua_clipPathFallback">
+<div class="relative">
+<div class="pe-11 pt-3">
+<div class="relative z-0 flex max-w-full">
+<div id="code-block-viewer" class="q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16" dir="ltr">
+<div class="cm-scroller">
+<pre class="cm-content q9tKkq_readonly m-0"><code>AtomicInteger
+      ↓
+atomic update
+      ↓
+threads coordinate safely
+      ↓
+correct result</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="">
+<div class="">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<h3 dir="auto" data-section-id="1w0ir2m" data-start="4229" data-end="4252">Hardware connection</h3>
+<p dir="auto" data-start="4254" data-end="4347">The threads may execute on different cores, each with its own caches and execution machinery.</p>
+<p dir="auto" data-start="4349" data-end="4495">The CPU/JVM must provide appropriate synchronization guarantees so that competing updates don't simply overwrite one another without coordination.</p></body></html>
